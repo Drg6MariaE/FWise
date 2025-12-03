@@ -1,46 +1,49 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { ID, Models } from "react-native-appwrite";
-import { account } from "./appwrite";
+import * as SecureStore from 'expo-secure-store';
+import { api } from "./api";
+
+type User = {
+  user_id: string;
+  email: string;
+  username: string;
+  has_seen_intro: boolean;
+  has_set_goals: boolean;
+};
 
 type AuthContextType = {
-  user: Models.User<Models.Preferences> | null;
+  user: User | null;
   isLoadingUser: boolean;
   signUp: (email: string, password: string) => Promise<string | null>;
   signIn: (email: string, password: string) => Promise<string | null>;
   signOut: () => Promise<void>;
+  hasSeenIntro: boolean;
+  isOnboardingComplete: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<Models.User<Models.Preferences> | null>(
-    null
-  );
-
+  const [user, setUser] = useState<User | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState<boolean>(true);
 
   useEffect(() => {
-    getUser();
+    loadUser();
   }, []);
 
-  const getCurrentSessionSafe = async () => {
-    try {
-      // Returns current session if it exists, otherwise null
-      // Appwrite throws if no session – we normalize that to null
-      // @ts-ignore types are fine; SDK returns a session object
-      return await account.getSession("current");
-    } catch {
-      return null;
-    }
-  };
-
-  const getUser = async () => {
+  const loadUser = async () => {
     try {
       setIsLoadingUser(true);
-      const session = await account.get();
-      setUser(session);
+      const token = await SecureStore.getItemAsync('auth_token');
+      if (token) {
+        const userData = await api.getMe();
+        if (userData && userData.user_id) {
+          setUser(userData);
+        } else {
+          await signOut(); 
+        }
+      }
     } catch (error) {
-      setUser(null);
+      console.log("Error loading user:", error);
     } finally {
       setIsLoadingUser(false);
     }
@@ -48,54 +51,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string) => {
     try {
-      await account.create(ID.unique(), email, password);
-      await signIn(email, password);
-      return null;
-    } catch (error) {
-      if (error instanceof Error) {
-        return error.message;
+      const data = await api.register(email, password);
+      if (data.token) {
+        await SecureStore.setItemAsync('auth_token', data.token);
+        setUser(data.user);
+        return null; 
+      } else {
+        return data.msg || "Registration failed";
       }
-
+    } catch (error) {
       return "An error occurred during sign up";
     }
   };
+
   const signIn = async (email: string, password: string) => {
     try {
-      setIsLoadingUser(true);
-
-      // If a session already exists, do not create a new one – just fetch the user
-      const active = await getCurrentSessionSafe();
-      if (!active) {
-        await account.createEmailPasswordSession(email, password);
+      const data = await api.login(email, password);
+      if (data.token) {
+        await SecureStore.setItemAsync('auth_token', data.token);
+        setUser(data.user);
+        return null; 
+      } else {
+        return data.msg || "Login failed";
       }
-
-      const session = await account.get();
-      setUser(session);
-      return null;
     } catch (error) {
-      if (error instanceof Error) {
-        return error.message;
-      }
       return "An error occurred during sign in";
-    } finally {
-      setIsLoadingUser(false);
     }
   };
 
   const signOut = async () => {
-    try {
-      setIsLoadingUser(true);
-      await account.deleteSession("current");
-      setUser(null);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoadingUser(false);
-    }
+    await SecureStore.deleteItemAsync('auth_token');
+    setUser(null);
   };
 
   const value = useMemo(
-    () => ({ user, isLoadingUser, signUp, signIn, signOut }),
+    () => ({ 
+        user, 
+        isLoadingUser, 
+        signUp, 
+        signIn, 
+        signOut,
+        hasSeenIntro: user?.has_seen_intro ?? false,
+        isOnboardingComplete: user?.has_set_goals ?? false
+    }),
     [user, isLoadingUser]
   );
 
@@ -111,6 +109,5 @@ export function useAuth() {
   if (context === undefined) {
     throw new Error("useAuth must be inside of the AuthProvider");
   }
-
   return context;
 }
