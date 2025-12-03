@@ -5,9 +5,22 @@ import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { lightTheme } from "../styles/colors";
 import { transitionStyle } from "../styles/transitionStyle";
+import { useAuth } from "../lib/auth-context"; 
+
 
 export default function transition() {
   const router = useRouter();
+  const { updateUserStatus } = useAuth();
+
+  const handleContinue = async () => {
+    // 1. Tell backend: Goals are set!
+    await updateUserStatus({ has_set_goals: true });
+    
+    // 2. The _layout.tsx RouteGuard will automatically see the change 
+    //    and redirect to /(tabs)/home, but we can force it too.
+    router.replace("/(tabs)/home");
+  };
+
 
   return (
     <>
@@ -39,7 +52,7 @@ export default function transition() {
           textStyle={{
             color: "#FF8A00",
           }}
-          onPress={() => router.replace("/home")}
+          onPress={handleContinue} // Use the new handler
         />
       </LinearGradient>
     </>

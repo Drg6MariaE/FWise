@@ -1,14 +1,7 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import * as SecureStore from 'expo-secure-store';
+// ... existing imports ...
 import { api } from "./api";
 
-type User = {
-  user_id: string;
-  email: string;
-  username: string;
-  has_seen_intro: boolean;
-  has_set_goals: boolean;
-};
+// ... existing User type ...
 
 type AuthContextType = {
   user: User | null;
@@ -18,70 +11,27 @@ type AuthContextType = {
   signOut: () => Promise<void>;
   hasSeenIntro: boolean;
   isOnboardingComplete: boolean;
+  // NEW: Add this function to the context type
+  updateUserStatus: (updates: { has_seen_intro?: boolean; has_set_goals?: boolean }) => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// ... existing AuthContext and AuthProvider ...
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoadingUser, setIsLoadingUser] = useState<boolean>(true);
+  // ... existing state (user, isLoadingUser) ...
 
-  useEffect(() => {
-    loadUser();
-  }, []);
+  // ... existing loadUser, signUp, signIn, signOut ...
 
-  const loadUser = async () => {
-    try {
-      setIsLoadingUser(true);
-      const token = await SecureStore.getItemAsync('auth_token');
-      if (token) {
-        const userData = await api.getMe();
-        if (userData && userData.user_id) {
-          setUser(userData);
-        } else {
-          await signOut(); 
-        }
-      }
-    } catch (error) {
-      console.log("Error loading user:", error);
-    } finally {
-      setIsLoadingUser(false);
+  // NEW: Implement the update function
+  const updateUserStatus = async (updates: { has_seen_intro?: boolean; has_set_goals?: boolean }) => {
+    if (!user) return;
+    
+    const updatedUser = await api.updateOnboardingStatus(updates);
+    
+    if (updatedUser) {
+      // Update local state immediately so the UI reacts
+      setUser((prev) => prev ? { ...prev, ...updates } : null);
     }
-  };
-
-  const signUp = async (email: string, password: string) => {
-    try {
-      const data = await api.register(email, password);
-      if (data.token) {
-        await SecureStore.setItemAsync('auth_token', data.token);
-        setUser(data.user);
-        return null; 
-      } else {
-        return data.msg || "Registration failed";
-      }
-    } catch (error) {
-      return "An error occurred during sign up";
-    }
-  };
-
-  const signIn = async (email: string, password: string) => {
-    try {
-      const data = await api.login(email, password);
-      if (data.token) {
-        await SecureStore.setItemAsync('auth_token', data.token);
-        setUser(data.user);
-        return null; 
-      } else {
-        return data.msg || "Login failed";
-      }
-    } catch (error) {
-      return "An error occurred during sign in";
-    }
-  };
-
-  const signOut = async () => {
-    await SecureStore.deleteItemAsync('auth_token');
-    setUser(null);
   };
 
   const value = useMemo(
@@ -92,7 +42,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn, 
         signOut,
         hasSeenIntro: user?.has_seen_intro ?? false,
-        isOnboardingComplete: user?.has_set_goals ?? false
+        isOnboardingComplete: user?.has_set_goals ?? false,
+        updateUserStatus // Add to value
     }),
     [user, isLoadingUser]
   );
@@ -102,12 +53,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be inside of the AuthProvider");
-  }
-  return context;
 }

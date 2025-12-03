@@ -4,8 +4,10 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useRef } from "react";
 import { Animated, Text, View } from "react-native";
+import { useAuth } from "@/frontend/lib/auth-context";
 
 export default function Step3() {
+  const { updateUserStatus, user } = useAuth();
   const scaleCircle1 = useRef(new Animated.Value(0)).current;
   const translateCircle1 = useRef(
     new Animated.ValueXY({ x: 0, y: 300 })
@@ -13,6 +15,15 @@ export default function Step3() {
 
   const translateText = useRef(new Animated.Value(-300)).current;
   const router = useRouter();
+
+  const handleFinishIntro = async () => {
+    // If user is already logged in (rare case here), update backend
+    if (user) {
+        await updateUserStatus({ has_seen_intro: true });
+    }
+    // Navigate to Auth
+    router.replace("/auth");
+  };
 
   useEffect(() => {
     return Animated.parallel([
@@ -97,12 +108,9 @@ export default function Step3() {
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-          <CustomButton
+        <CustomButton
             title="Let's Start"
-            onPress={() => {
-              console.log("Navigating to /auth");
-              router.replace("/auth");
-            }}
+            onPress={handleFinishIntro} // Use the new handler
           />
         </View>
       </LinearGradient>
