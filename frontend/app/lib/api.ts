@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 
 // ⚠️ REPLACE with your computer's IP Address
-const API_BASE_URL = '127.0.0.1'; 
+const API_BASE_URL = 'http://127.0.0.1/api/user'; 
 
 const getAuthHeaders = async () => {
   const token = await SecureStore.getItemAsync('auth_token');
