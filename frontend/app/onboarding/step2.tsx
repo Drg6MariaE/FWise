@@ -1,9 +1,9 @@
-import { useEffect, useRef } from "react";
-import { View, Text, Animated, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
-import CustomButton from "@/components/ui/button";
+import CustomButton from "@/frontend/app/components/ui/button";
+import { step2Style } from "@/frontend/app/styles/step2Style";
 import { LinearGradient } from "expo-linear-gradient";
-import { step2Style } from "@/styles/step2Style";
+import { useRouter } from "expo-router";
+import { useEffect, useRef } from "react";
+import { Animated, Text, View } from "react-native";
 
 export default function Step2() {
   const router = useRouter();

@@ -1,11 +1,18 @@
-import { useAuth } from "../lib/auth-context";
+import Header from "@/frontend/app/components/ui/header";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, View, StyleSheet, TouchableOpacity, Text } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Button, TextInput } from "react-native-paper";
-import { authStyles } from "../styles/authStyles";
-import { LinearGradient } from "expo-linear-gradient";
-import Header from "@/components/ui/header";
+import { useAuth } from "./lib/auth-context";
+import { authStyles } from "./styles/authStyles";
 
 export default function AuthScreen() {
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
@@ -22,14 +29,14 @@ export default function AuthScreen() {
       setError("Please enter both email and password.");
       return;
     }
-  
+
     if (password.length < 6) {
       setError("Password must be at least 6 characters long.");
       return;
     }
-  
+
     setError("");
-  
+
     try {
       if (isSignUp) {
         // ✅ SIGN UP: Create account
@@ -38,23 +45,26 @@ export default function AuthScreen() {
           setError(error);
           return;
         }
-  
+
         router.replace("/onboarding/setup");
       } else {
         // ✅ SIGN IN: Log in existing user
         const error = await signIn(email, password);
-  
+
         // ❌ If credentials are wrong or account doesn’t exist
-        if (error?.includes("Invalid credentials") || error?.includes("not found")) {
+        if (
+          error?.includes("Invalid credentials") ||
+          error?.includes("not found")
+        ) {
           setError("No account found. Please sign up first.");
           return;
         }
-  
+
         if (error) {
           setError(error);
           return;
         }
-  
+
         router.replace("/(tabs)/home");
       }
     } catch (err) {

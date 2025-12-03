@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { setup2Style as s } from "@/frontend/app/styles/setup2Style";
 import Slider from "@react-native-community/slider";
-import { setup2Style as s } from "@/styles/setup2Style";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+import React, { useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 const Setup2 = () => {
   const [sliderValue, setSliderValue] = useState(12);
@@ -25,7 +25,7 @@ const Setup2 = () => {
         end={{ x: 1, y: 1 }}
       />
       <ScrollView>
-      <TouchableOpacity onPress={() => router.push("/onboarding/setup3")}>
+        <TouchableOpacity onPress={() => router.push("/onboarding/setup3")}>
           <Text style={s.maybeLater}>Next</Text>
         </TouchableOpacity>
         <Text style={s.stepText}>Step 2 of 3: Set Your Goals</Text>

@@ -1,4 +1,4 @@
-import { AuthProvider, useAuth } from "@/lib/auth-context";
+import { AuthProvider, useAuth } from "@/frontend/app/lib/auth-context";
 import { Stack, useRouter, useSegments } from "expo-router";
 import React, { useEffect } from "react";
 

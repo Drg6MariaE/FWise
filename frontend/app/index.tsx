@@ -1,16 +1,14 @@
-import React, { useEffect } from "react";
-import { StyleSheet, Image } from "react-native";
-import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { splashStyle } from "../styles/splashStyle";
-import{ lightTheme, darkTheme as colors } from "../styles/colors";
+import { useRouter } from "expo-router";
+import React, { useEffect } from "react";
+import { Image, StyleSheet } from "react-native";
+import { lightTheme } from "./styles/colors";
+import { splashStyle } from "./styles/splashStyle";
 
 export default function Splash() {
   const router = useRouter();
-  
 
   useEffect(() => {
-
     const timer = setTimeout(() => {
       router.replace("/onboarding/step1"); // lowercase paths = good practice
     }, 3000);
@@ -31,4 +29,4 @@ export default function Splash() {
   );
 }
 
-const styles = StyleSheet.create({});  
+const styles = StyleSheet.create({});

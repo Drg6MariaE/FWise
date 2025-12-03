@@ -1,5 +1,5 @@
+import Header from "@/frontend/app/components/ui/header";
 import { Stack } from "expo-router";
-import Header from "@/components/ui/header";
 
 export default function OnboardingLayout() {
   return (

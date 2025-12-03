@@ -1,6 +1,6 @@
+import { buttonStyle } from "@/frontend/app/styles/buttonStyle";
 import React from "react";
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from "react-native";
-import { buttonStyle } from "@/styles/buttonStyle";
+import { Text, TextStyle, TouchableOpacity, ViewStyle } from "react-native";
 
 type CustomButtonProps = {
   title: string;
@@ -9,7 +9,12 @@ type CustomButtonProps = {
   textStyle?: TextStyle | TextStyle[];
 };
 
-const CustomButton: React.FC<CustomButtonProps> = ({ title, onPress, style, textStyle }) => {
+const CustomButton: React.FC<CustomButtonProps> = ({
+  title,
+  onPress,
+  style,
+  textStyle,
+}) => {
   return (
     <TouchableOpacity
       style={[buttonStyle.buttonContainer, style]}

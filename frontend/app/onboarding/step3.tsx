@@ -1,9 +1,9 @@
-import { useRef, useEffect } from "react";
-import { View, Text, Animated } from "react-native";
-import { useRouter } from "expo-router";
-import CustomButton from "@/components/ui/button";
+import CustomButton from "@/frontend/app/components/ui/button";
+import { step3Style } from "@/frontend/app/styles/step3Style";
 import { LinearGradient } from "expo-linear-gradient";
-import { step3Style } from "@/styles/step3Style";
+import { useRouter } from "expo-router";
+import { useEffect, useRef } from "react";
+import { Animated, Text, View } from "react-native";
 
 export default function Step3() {
   const scaleCircle1 = useRef(new Animated.Value(0)).current;
